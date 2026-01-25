@@ -4,10 +4,11 @@ import java.util.Scanner;
 import java.util.TreeMap;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 
 public class Input extends Thread {
 
-	static HashMap<String, OrderBook> stocks = new HashMap<>();
+	HashMap<String, OrderBook> stocks = new HashMap<>();
 
 	public Input(HashMap<String, OrderBook> stocks) {
 		this.stocks = stocks;
@@ -38,7 +39,7 @@ public class Input extends Thread {
 				System.out.print("Enter 'b' to buy or 's' to sell: ");
 				String input = sc.nextLine();
 
-				System.out.println("Enter the quantity of the stocks: ");
+				System.out.print("Enter the quantity of the stocks: ");
 				int quantity = Integer.parseInt(sc.nextLine());
 
 				System.out.print("Enter the limit amount: ");
@@ -55,40 +56,29 @@ public class Input extends Thread {
 				if (input.equals("b") || input.equals("B")) {
 					isBuy = true;
 
-					// If the stock with the same price exists in the treeMap, we only increase the
-					// quantity instead of overriding by creating a new Order class
-					if (orderBook.buy.containsKey(amount)) {
-						int previousQuantity = orderBook.buy.get(amount).quantity;
-						System.out.println("This is inside the appending the quantity for buy" + previousQuantity);
-						orderBook.buy.get(amount).quantity = previousQuantity + quantity;
-					} else {
+					if (!orderBook.buy.containsKey(amount)) {
 
-						// This is executed if this is the first time the stock is listed in that price
-						System.out.println("This is inside creating the Order class for a specific price in buy");
-						orderBook.buy.put(amount, new Order(stockTableForInput.get(stock), quantity));
+						orderBook.buy.put(amount, new LinkedList<Order>());
 					}
+					orderBook.buy.get(amount).offer(new Order(stockTableForInput.get(stock), quantity));
 
 				} else if (input.equals("s") || input.equals("S")) {
 					isBuy = false;
 
-					// If the stock with the same price exists in the treeMap, we only increase the
-					// quantity instead of overriding by creating a new Order class
-					if (orderBook.sell.containsKey(amount)) {
-						int previousQuantity = orderBook.sell.get(amount).quantity;
-						orderBook.sell.get(amount).quantity = previousQuantity + quantity;
-					} else {
-
-						// This is executed if this is the first time the stock is listed in that price
-						orderBook.sell.put(amount, new Order(stockTableForInput.get(stock), quantity));
+					if (!orderBook.sell.containsKey(amount)) {
+						orderBook.sell.put(amount, new LinkedList<Order>());
 					}
+
+					orderBook.sell.get(amount).offer(new Order(stockTableForInput.get(stock), quantity));
+
 				} else {
 					System.out.println("Enter correct order");
 					return;
 				}
-
 			}
+		} catch (
 
-		} catch (Exception e) {
+		Exception e) {
 			e.printStackTrace();
 		}
 	}

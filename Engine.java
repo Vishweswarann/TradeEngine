@@ -1,10 +1,10 @@
 
-import java.awt.List;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Queue;
 import java.util.Set;
 import java.util.TreeMap;
 
@@ -36,8 +36,8 @@ public class Engine {
 			Input input = new Input(stocks);
 			input.start();
 
-			TreeMap<Double, Order> buy = new TreeMap<>(Collections.reverseOrder());
-			TreeMap<Double, Order> sell = new TreeMap<>();
+			TreeMap<Double, Queue<Order>> buy = new TreeMap<>(Collections.reverseOrder());
+			TreeMap<Double, Queue<Order>> sell = new TreeMap<>();
 
 			while (true) {
 
@@ -56,23 +56,28 @@ public class Engine {
 					if (matches.iterator().hasNext()) {
 						Double price = matches.iterator().next();
 
-						int buyQuantity = buy.get(price).quantity;
-						int sellQuantity = sell.get(price).quantity;
+						while (!buy.get(price).isEmpty() && !sell.get(price).isEmpty()) {
+							int buyQuantity = buy.get(price).peek().quantity;
+							int sellQuantity = sell.get(price).peek().quantity;
 
-						if (buyQuantity > sellQuantity) {
+							if (buyQuantity > sellQuantity) {
 
-							System.out.println("Sold " + sellQuantity + " " + name + " stocks for " + price);
-							sell.remove(price);
-							buy.get(price).quantity = buyQuantity - sellQuantity;
-						} else if (buyQuantity < sellQuantity) {
+								System.out.println("Sold " + sellQuantity + " " + name + " stocks for " + price);
+								sell.get(price).poll();
+								buy.get(price).peek().quantity = buyQuantity - sellQuantity;
 
-							System.out.println("Sold " + buyQuantity + " " + name + " stocks for " + price);
-							buy.remove(price);
-							sell.get(price).quantity = sellQuantity - buyQuantity;
-						} else {
-							System.out.println("Sold " + buyQuantity + " " + name + " stocks for " + price);
-							buy.remove(price);
-							sell.remove(price);
+							} else if (buyQuantity < sellQuantity) {
+
+								System.out.println("Sold " + buyQuantity + " " + name + " stocks for " + price);
+								buy.get(price).poll();
+								sell.get(price).peek().quantity = sellQuantity - buyQuantity;
+
+							} else {
+								System.out.println("Sold " + buyQuantity + " " + name + " stocks for " + price);
+								buy.get(price).poll();
+								sell.get(price).poll();
+							}
+
 						}
 					}
 				}
@@ -89,8 +94,8 @@ public class Engine {
 
 class OrderBook {
 
-	static TreeMap<Double, Order> buy = new TreeMap<>(Collections.reverseOrder());
-	static TreeMap<Double, Order> sell = new TreeMap<>();
+	static TreeMap<Double, Queue<Order>> buy = new TreeMap<>(Collections.reverseOrder());
+	static TreeMap<Double, Queue<Order>> sell = new TreeMap<>();
 }
 
 class Order {
