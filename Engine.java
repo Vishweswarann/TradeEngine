@@ -10,19 +10,7 @@ import java.util.TreeMap;
 
 public class Engine {
 
-	// This is the main hashMap which stores the stockname as its key and their
-	// corresponding OrderBook class as value
-
 	static HashMap<String, OrderBook> stocks = new HashMap<>();
-
-	// For each stock a new OrderBook class is created
-	// The OrderBook class contains the two treeMaps 'buy' and 'sell' for that
-	// particular stock
-	//
-	// The treeMap 'buy' and 'sell' has price as their key and Order class as its
-	// value
-	//
-	// The Order class contains information about each buy and sell orders
 
 	public static void main(String[] args) {
 
